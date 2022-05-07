@@ -7,7 +7,7 @@ from app.schemas.schemas import BookCreate, BookRead, BookReadWithAuthor, BookUp
 
 from app.services.database import get_db
 from app.resources import Tags
-from app.models import Book
+from app.models import Author, Book, Category, Publisher
 
 
 books_router = APIRouter(prefix='/books')
@@ -21,24 +21,34 @@ books_router = APIRouter(prefix='/books')
     tags=[Tags.Books]
 )
 def create_book(*, db: Session = Depends(get_db), book: BookCreate):
-    try:
-        new_book = Book(
-            name=book.name, 
-            description=book.description, 
-            author_id=book.author_id,
-            category_id=book.category_id,
-            publisher_id=book.publisher_id,
-        )
-        db.add(new_book)
-        db.commit()
-        db.refresh(new_book)
-
-        return new_book
-    except IntegrityError:
-        db.rollback()
-        db.close()
+    db_book = db.query(Book).filter(Book.name == book.name).first()
+    if db_book:
         raise HTTPException(status_code=400, detail="Book already exists.")
 
+    db_author = db.query(Author).filter(Author.id == book.author_id).first()
+    if not db_author:
+        raise HTTPException(status_code=400, detail="Author not found.")
+
+    db_category = db.query(Category).filter(Category.id == book.category_id).first()
+    if not db_category:
+        raise HTTPException(status_code=400, detail="Category not found.")
+
+    db_publisher = db.query(Publisher).filter(Publisher.id == book.publisher_id).first()
+    if not db_publisher:
+        raise HTTPException(status_code=400, detail="Publisher not found.")
+
+    new_book = Book(
+        name=book.name, 
+        description=book.description, 
+        author_id=book.author_id,
+        category_id=book.category_id,
+        publisher_id=book.publisher_id,
+    )
+    db.add(new_book)
+    db.commit()
+    db.refresh(new_book)
+
+    return new_book
 
 @books_router.get(
     '/{book_id}', 
