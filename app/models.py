@@ -10,7 +10,7 @@ class Author(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True)
 
-    books = relationship('Book', back_populates='author')
+    books = relationship('Book', back_populates='author', cascade="all, delete-orphan")
 
 
 class Book(Base):
@@ -35,7 +35,7 @@ class Category(Base):
     name = Column(String, unique=True, index=True)
     description = Column(String)
 
-    books = relationship('Book', back_populates='category')
+    books = relationship('Book', back_populates='category', cascade="all, delete-orphan")
 
 
 class Publisher(Base):
@@ -45,4 +45,4 @@ class Publisher(Base):
     name = Column(String, unique=True, index=True)
     description = Column(String)
 
-    books = relationship('Book', back_populates='publisher')
+    books = relationship('Book', back_populates='publisher', cascade="all, delete-orphan")

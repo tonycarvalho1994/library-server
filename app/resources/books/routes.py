@@ -119,7 +119,7 @@ def update_book(*, db: Session = Depends(get_db), book_id: int, book: BookUpdate
 
 
 @books_router.delete('/{book_id}', tags=[Tags.Books])
-def delete_author(*, db: Session = Depends(get_db), book_id: int):
+def delete_book(*, db: Session = Depends(get_db), book_id: int):
     book = db.get(Book, book_id)
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
