@@ -3,7 +3,7 @@ from unicodedata import name
 from fastapi import Depends, APIRouter, HTTPException, Query, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-from app.schemas.schemas import BookCreate, BookRead, BookReadWithAuthor, BookUpdate
+from app.schemas.schemas import BookCreate, BookReadWithAuthor, BookUpdate
 
 from app.services.database import get_db
 from app.resources import Tags
@@ -37,18 +37,22 @@ def create_book(*, db: Session = Depends(get_db), book: BookCreate):
     if not db_publisher:
         raise HTTPException(status_code=400, detail="Publisher not found.")
 
-    new_book = Book(
-        name=book.name, 
-        description=book.description, 
-        author_id=book.author_id,
-        category_id=book.category_id,
-        publisher_id=book.publisher_id,
-    )
-    db.add(new_book)
-    db.commit()
-    db.refresh(new_book)
+    try:
+        new_book = Book(
+            name=book.name, 
+            description=book.description, 
+            author_id=book.author_id,
+            category_id=book.category_id,
+            publisher_id=book.publisher_id,
+        )
+        db.add(new_book)
+        db.commit()
+        db.refresh(new_book)
 
-    return new_book
+        return new_book
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Something went wrong.")
 
 @books_router.get(
     '/{book_id}', 
