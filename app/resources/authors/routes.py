@@ -59,7 +59,7 @@ def get_all_authors(
     name: str | None = Query(None, min_length=3, max_length=20)
 ):
     if name:
-        return db.query(Author).filter(Author.full_name.ilike('%' + name + '%')).all()
+        return db.query(Author).filter(Author.name.ilike('%' + name + '%')).all()
     
     return db.query(Author).all()
 
