@@ -13,3 +13,8 @@ app.include_router(categories_router)
 app.include_router(publishers_router)
 app.include_router(books_router)
 app.include_router(users_router)
+
+
+@app.get('/health_check')
+def get_healthy_check():
+    return {'message': 'Up and running :)'}
