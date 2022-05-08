@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta, datetime
 from fastapi import Depends
 from pydantic import BaseModel
@@ -12,7 +13,7 @@ from app.schemas.schemas import UserInDB, UserRead
 from app.services.database import get_db
 
 
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+SECRET_KEY = os.environ.get('SECRET_KEY', 'my_secret_key_123')
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
