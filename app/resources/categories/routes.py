@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.resources import Tags
 from app.schemas.schemas import CategoryCreate, CategoryRead, CategoryUpdate
 
+from app.auth.oauth2 import oauth2_scheme
 from app.services.database import get_db
 from app.models import Category
 
@@ -16,7 +17,8 @@ categories_router = APIRouter(prefix='/categories')
     response_model=CategoryRead, 
     response_model_exclude_none=True, 
     status_code=status.HTTP_201_CREATED,
-    tags=[Tags.Categories]
+    tags=[Tags.Categories],
+    dependencies=[Depends(oauth2_scheme)]
 )
 def create_category(*, db: Session = Depends(get_db), category: CategoryCreate):
     try:
@@ -68,7 +70,8 @@ def get_all_categories(
     '/{category_id}', 
     response_model=CategoryRead, 
     response_model_exclude_none=True,
-    tags=[Tags.Categories]
+    tags=[Tags.Categories],
+    dependencies=[Depends(oauth2_scheme)]
 )
 def update_category(*, db: Session = Depends(get_db), category_id: int, category: CategoryUpdate):
     db_category = db.get(Category, category_id)
@@ -84,7 +87,7 @@ def update_category(*, db: Session = Depends(get_db), category_id: int, category
     return db_category
 
 
-@categories_router.delete('/{category_id}', tags=[Tags.Categories])
+@categories_router.delete('/{category_id}', tags=[Tags.Categories], dependencies=[Depends(oauth2_scheme)])
 def delete_author(*, db: Session = Depends(get_db), category_id: int):
     category = db.get(Category, category_id)
     if not category:

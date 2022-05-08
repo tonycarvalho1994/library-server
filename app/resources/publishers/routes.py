@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from app.schemas.schemas import PublisherCreate, PublisherRead, PublisherUpdate
 
+from app.auth.oauth2 import oauth2_scheme
 from app.services.database import get_db
 from app.resources import Tags
 from app.models import Publisher
@@ -16,7 +17,8 @@ publishers_router = APIRouter(prefix='/publishers')
     response_model=PublisherRead, 
     response_model_exclude_none=True,
     status_code=status.HTTP_201_CREATED,
-    tags=[Tags.Publishers]
+    tags=[Tags.Publishers],
+    dependencies=[Depends(oauth2_scheme)]
 )
 def create_publisher(*, db: Session = Depends(get_db), publisher: PublisherCreate):
     try:
@@ -67,7 +69,8 @@ def get_all_publishers(
     '/{publisher_id}', 
     response_model=PublisherRead, 
     response_model_exclude_none=True,
-    tags=[Tags.Publishers]
+    tags=[Tags.Publishers],
+    dependencies=[Depends(oauth2_scheme)]
 )
 def update_publisher(*, db: Session = Depends(get_db), publisher_id: int, publisher: PublisherUpdate):
     db_publisher = db.get(Publisher, publisher_id)
@@ -83,7 +86,7 @@ def update_publisher(*, db: Session = Depends(get_db), publisher_id: int, publis
     return db_publisher
 
 
-@publishers_router.delete('/{publisher_id}', tags=[Tags.Publishers])
+@publishers_router.delete('/{publisher_id}', tags=[Tags.Publishers], dependencies=[Depends(oauth2_scheme)])
 def delete_author(*, db: Session = Depends(get_db), publisher_id: int):
     publisher = db.get(Publisher, publisher_id)
     if not publisher:

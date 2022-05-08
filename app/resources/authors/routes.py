@@ -2,6 +2,7 @@ from fastapi import Depends, APIRouter, HTTPException, Query, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.auth.oauth2 import oauth2_scheme
 from app.schemas.schemas import AuthorCreate, AuthorRead, AuthorUpdate
 from app.models import Author
 from app.services.database import get_db
@@ -16,7 +17,8 @@ authors_router = APIRouter(prefix='/authors')
     response_model=AuthorRead, 
     response_model_exclude_none=True, 
     status_code=status.HTTP_201_CREATED,
-    tags=[Tags.Authors]
+    tags=[Tags.Authors],
+    dependencies=[Depends(oauth2_scheme)]
 )
 def create_author(*, db: Session = Depends(get_db), author: AuthorCreate):
     try:
@@ -68,7 +70,8 @@ def get_all_authors(
     '/{author_id}', 
     response_model=AuthorRead, 
     response_model_exclude_none=True,
-    tags=[Tags.Authors]
+    tags=[Tags.Authors],
+    dependencies=[Depends(oauth2_scheme)]
 )
 def update_author(*, db: Session = Depends(get_db), author_id: int, author: AuthorUpdate):
     db_author = db.get(Author, author_id)
@@ -84,7 +87,7 @@ def update_author(*, db: Session = Depends(get_db), author_id: int, author: Auth
     return db_author
 
 
-@authors_router.delete('/{author_id}', tags=[Tags.Authors])
+@authors_router.delete('/{author_id}', tags=[Tags.Authors], dependencies=[Depends(oauth2_scheme)])
 def delete_author(*, db: Session = Depends(get_db), author_id: int):
     author = db.get(Author, author_id)
     if not author:

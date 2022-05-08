@@ -1,10 +1,9 @@
 from typing import List
-from unicodedata import name
 from fastapi import Depends, APIRouter, HTTPException, Query, status
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-from app.schemas.schemas import BookCreate, BookReadWithAuthor, BookUpdate
 
+from app.schemas.schemas import BookCreate, BookReadWithAuthor, BookUpdate
+from app.auth.oauth2 import oauth2_scheme
 from app.services.database import get_db
 from app.resources import Tags
 from app.models import Author, Book, Category, Publisher
@@ -18,7 +17,8 @@ books_router = APIRouter(prefix='/books')
     response_model=BookReadWithAuthor, 
     response_model_exclude_none=True,
     status_code=status.HTTP_201_CREATED,
-    tags=[Tags.Books]
+    tags=[Tags.Books],
+    dependencies=[Depends(oauth2_scheme)]
 )
 def create_book(*, db: Session = Depends(get_db), book: BookCreate):
     db_book = db.query(Book).filter(Book.name == book.name).first()
@@ -102,7 +102,8 @@ def get_all_books(
     '/{book_id}', 
     response_model=BookReadWithAuthor, 
     response_model_exclude_none=True,
-    tags=[Tags.Books]
+    tags=[Tags.Books],
+    dependencies=[Depends(oauth2_scheme)]
 )
 def update_book(*, db: Session = Depends(get_db), book_id: int, book: BookUpdate):
     db_book = db.get(Book, book_id)
@@ -118,7 +119,7 @@ def update_book(*, db: Session = Depends(get_db), book_id: int, book: BookUpdate
     return db_book
 
 
-@books_router.delete('/{book_id}', tags=[Tags.Books])
+@books_router.delete('/{book_id}', tags=[Tags.Books], dependencies=[Depends(oauth2_scheme)])
 def delete_book(*, db: Session = Depends(get_db), book_id: int):
     book = db.get(Book, book_id)
     if not book:
